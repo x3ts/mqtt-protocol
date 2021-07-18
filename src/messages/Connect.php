@@ -85,14 +85,30 @@ class Connect extends MessageBase
         return $this;
     }
 
+    protected string $_protocolName = 'MQTT';
+
     public function getProtocolName(): string
     {
-        return 'MQTT';
+        return $this->_protocolName;
     }
+
+    public function setProtocolName(string $name): static
+    {
+        $this->_protocolName = $name;
+        return $this;
+    }
+
+    protected int $_protocolLevel = self::VER_3_1_1;
 
     public function getProtocolLevel(): string
     {
-        return self::VER_3_1_1;
+        return $this->_protocolLevel;
+    }
+
+    public function setProtocolLevel(int $protocolLevel): static
+    {
+        $this->_protocolLevel = $protocolLevel;
+        return $this;
     }
 
     public function getConnectFlags(): int
@@ -137,6 +153,36 @@ class Connect extends MessageBase
             $remain .= self::encodeUTF8Str($this->password);
         }
         return $remain;
+    }
+
+    protected function decodeMessageBody(string $buffer, int $flags): static
+    {
+        $this->setProtocolName(self::decodeUTF8Str($buffer));
+        $this->setProtocolLevel(self::decodeByte($buffer));
+        $connectFlags = self::decodeByte($buffer);
+        $this->setKeepAlive(self::decodeUint16($buffer));
+        $this->setClientIdentifier(self::decodeUTF8Str($buffer));
+        $this->setCleanSession($connectFlags & 0b00000010 > 0);
+        if ($connectFlags & 0b00000100 > 0) {
+            $this->setWillTopic(self::decodeUTF8Str($buffer));
+            $this->setWillMessage(self::decodeUTF8Str($buffer));
+            $this->setWillQoS(($connectFlags & 0b00011000) >> 3);
+            $this->setWillRetain($connectFlags & 0b00100000 > 0);
+        } else {
+            $this->disableWill();
+        }
+        if ($connectFlags & 0b10000000 > 0) {
+            $this->setUsername(self::decodeUTF8Str($buffer));
+        } else {
+            $this->setUsername('');
+        }
+        if ($connectFlags & 0b01000000 > 0) {
+            $this->setPassword(self::decodeUTF8Str($buffer));
+        } else {
+            $this->setPassword('');
+        }
+
+        return $this;
     }
 
     public function setKeepAlive(int $keepAlive): static

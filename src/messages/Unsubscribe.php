@@ -36,4 +36,13 @@ class Unsubscribe extends MessageBase
         }
         return $remain;
     }
+
+    protected function decodeMessageBody(string $buffer, int $flags): static
+    {
+        $this->packetIdentifier = self::decodeUint16($buffer);
+        while ($buffer !== '') {
+            $this->topics[] = self::decodeUTF8Str($buffer);
+        }
+        return $this;
+    }
 }

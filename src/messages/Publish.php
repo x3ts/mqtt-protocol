@@ -80,4 +80,17 @@ class Publish extends MessageBase
         $remain .= $this->payload;
         return $remain;
     }
+
+    protected function decodeMessageBody(string $buffer, int $flags): static
+    {
+        $this->setDup($flags & 0b00001000 > 0);
+        $this->setQoS(($flags & 0b00000110) >> 1);
+        $this->setRetain($flags & 0b00000001 > 0);
+        $this->setTopic(self::decodeUTF8Str($buffer));
+        if ($this->qos > 0) {
+            $this->setPacketIdentifier(self::decodeUint16($buffer));
+        }
+        $this->setPayload($buffer);
+        return $this;
+    }
 }

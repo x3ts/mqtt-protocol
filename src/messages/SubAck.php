@@ -33,4 +33,13 @@ class SubAck extends MessageBase
         }
         return $remain;
     }
+
+    protected function decodeMessageBody(string $buffer, int $flags): static
+    {
+        $this->packetIdentifier = self::decodeUint16($buffer);
+        while ($buffer !== '') {
+            $this->returnCodes[] = self::decodeByte($buffer);
+        }
+        return $this;
+    }
 }

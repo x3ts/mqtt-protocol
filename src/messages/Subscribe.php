@@ -43,4 +43,16 @@ class Subscribe extends MessageBase
         }
         return $remain;
     }
+
+    protected function decodeMessageBody(string $buffer, int $flags): static
+    {
+        $this->packetIdentifier = self::decodeUint16($buffer);
+        while ($buffer !== '') {
+            $this->topicQosPairs[] = [
+                self::decodeUTF8Str($buffer),
+                self::decodeByte($buffer),
+            ];
+        }
+        return $this;
+    }
 }

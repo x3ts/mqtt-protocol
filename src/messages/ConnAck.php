@@ -49,4 +49,11 @@ class ConnAck extends MessageBase
     {
         return pack('CC', $this->getConnAckFlags(), $this->ackCode);
     }
+
+    protected function decodeMessageBody(string $buffer, int $flags): static
+    {
+        $this->setSessionPresent(self::decodeByte($buffer) > 0);
+        $this->setAckCode(self::decodeByte($buffer));
+        return $this;
+    }
 }
