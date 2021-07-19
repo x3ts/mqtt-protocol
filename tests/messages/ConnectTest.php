@@ -48,7 +48,6 @@ class ConnectTest extends TestCase
             pack('CC', 0x00, 0x03) . 'bye' . // will message
             pack('CC', 0x00, 0x04) . 'test' . // username
             pack('CC', 0x00, 0x03) . 'pwd'; // password
-        echo $binMsg, PHP_EOL;
         /** @var Connect $msg */
         $msg = MessageBase::decode($binMsg);
         self::assertInstanceOf(Connect::class, $msg);

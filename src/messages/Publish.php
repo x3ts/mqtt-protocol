@@ -83,9 +83,9 @@ class Publish extends MessageBase
 
     protected function decodeMessageBody(string $buffer, int $flags): static
     {
-        $this->setDup($flags & 0b00001000 > 0);
+        $this->setDup((bool) ($flags & 0b00001000));
         $this->setQoS(($flags & 0b00000110) >> 1);
-        $this->setRetain($flags & 0b00000001 > 0);
+        $this->setRetain((bool) ($flags & 0b00000001));
         $this->setTopic(self::decodeUTF8Str($buffer));
         if ($this->qos > 0) {
             $this->setPacketIdentifier(self::decodeUint16($buffer));
