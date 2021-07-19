@@ -36,13 +36,8 @@ abstract class MessageBase
 
     abstract protected function decodeMessageBody(string $buffer, int $flags): static;
 
-    public static function decode(string &$buffer): static
+    public static function decodeToMessage(int $type, int $flags, string $remain): static
     {
-        $fixedHeader = ord($buffer[0]);
-        $type = ($fixedHeader & 0b11110000) >> 4;
-        $flags = $fixedHeader & 0b00001111;
-        $buffer = substr($buffer, 1);
-        $remain = self::decodeRemain($buffer);
         return match ($type) {
             Types::Connect => Connect::newInstance()->decodeMessageBody($remain, $flags),
             Types::ConnAck => ConnAck::newInstance()->decodeMessageBody($remain, $flags),
@@ -59,6 +54,16 @@ abstract class MessageBase
             Types::PingResp => PingResp::newInstance()->decodeMessageBody($remain, $flags),
             Types::Disconnect => Disconnect::newInstance()->decodeMessageBody($remain, $flags),
         };
+    }
+
+    public static function decode(string &$buffer): static
+    {
+        $fixedHeader = ord($buffer[0]);
+        $type = ($fixedHeader & 0b11110000) >> 4;
+        $flags = $fixedHeader & 0b00001111;
+        $buffer = substr($buffer, 1);
+        $remain = self::decodeRemain($buffer);
+        return self::decodeToMessage($type, $flags, $remain);
     }
 
     public function encode(): string
