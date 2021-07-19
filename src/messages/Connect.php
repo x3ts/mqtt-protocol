@@ -199,4 +199,13 @@ class Connect extends MessageBase
         $this->willQoS = QoS::AT_MOST_ONCE;
         return $this;
     }
+
+    public function setWill(Will $will): static
+    {
+        $this->willTopic = $will->topic;
+        $this->willMessage = $will->message;
+        $this->willQoS = $will->qos;
+        $this->willRetain = $will->retain;
+        return $this;
+    }
 }

@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use x3ts\mqtt\protocol\constants\QoS;
 use x3ts\mqtt\protocol\messages\Connect;
 use x3ts\mqtt\protocol\messages\MessageBase;
+use x3ts\mqtt\protocol\messages\Will;
 
 class ConnectTest extends TestCase
 {
@@ -25,6 +26,34 @@ class ConnectTest extends TestCase
             pack('C', 0x04) . //protocol level
             // Username,Password,WillRetain,WillQoS,WillFlag,CleanSession,Reserved
             pack('C', 0b11001100) . // connect flags
+            pack('CC', 0x00, 0x30) . // keep alive 48
+            pack('CC', 0x00, 0x07) . 'test-01' . // client id
+            pack('CC', 0x00, 0x09) . 'test/will' . // will topic
+            pack('CC', 0x00, 0x03) . 'bye' . // will message
+            pack('CC', 0x00, 0x04) . 'test' . // username
+            pack('CC', 0x00, 0x03) . 'pwd'; // password
+        self::assertEquals($binMsg, $msg->encode());
+    }
+
+    public function testSetWill(): void
+    {
+        $msg = Connect::newInstance()
+            ->setWill(new Will(
+                topic: 'test/will',
+                message: 'bye',
+                qos: QoS::EXACTLY_ONCE,
+                retain: false,
+            ))
+            ->setKeepAlive(48)
+            ->setClientIdentifier('test-01')
+            ->setUsername('test')
+            ->setPassword('pwd');
+        $binMsg = pack('C', 0b00010000) . //fixed header
+            pack('C', 0x2E) . // remain length
+            pack('CC', 0x00, 0x04) . 'MQTT' . //protocol name
+            pack('C', 0x04) . //protocol level
+            // Username,Password,WillRetain,WillQoS,WillFlag,CleanSession,Reserved
+            pack('C', 0b11010100) . // connect flags
             pack('CC', 0x00, 0x30) . // keep alive 48
             pack('CC', 0x00, 0x07) . 'test-01' . // client id
             pack('CC', 0x00, 0x09) . 'test/will' . // will topic
