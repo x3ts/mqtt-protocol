@@ -2,8 +2,6 @@
 
 namespace x3ts\mqtt\protocol\messages;
 
-use Exception;
-use MongoDB\BSON\Type;
 use x3ts\mqtt\protocol\constants\Types;
 use x3ts\mqtt\protocol\exceptions\MalformedRemainLengthException;
 use x3ts\mqtt\protocol\traits\GetterSetter;
